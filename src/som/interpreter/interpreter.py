@@ -1,5 +1,8 @@
 from som.interpreter.bytecodes import bytecode_length
 
+class InterpreterHalt(Exception):
+    pass
+
 class Interpreter(object):
     
     def __init__(self, universe):
@@ -22,11 +25,8 @@ class Interpreter(object):
                                 self._do_return_local,
                                 self._do_return_non_local]
     
-    class InterpreterHalt(Exception):
-        pass
-    
     def _do_halt(self, bytecode_index):
-        raise self.InterpreterHalt()
+        raise InterpreterHalt()
     
     def _do_dup(self, bytecode_index):
         # Handle the dup bytecode
@@ -195,7 +195,7 @@ class Interpreter(object):
                 # Handle the current bytecode
                 self._dispatch_table[bytecode](bytecode_index)
         
-        except self.InterpreterHalt:
+        except InterpreterHalt:
             return self.get_frame().get_stack_element(0)
             
     def push_new_frame(self, method):
