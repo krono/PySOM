@@ -21,9 +21,9 @@ class Frame(Array):
 
     def __init__(self, nilObject):
         Array.__init__(self, nilObject)
-        self._stack_pointer  = None
-        self._bytecode_index = None
-        self._local_offset   = None
+        self._stack_pointer  = 0
+        self._bytecode_index = 0
+        self._local_offset   = 0
     
     def get_previous_frame(self):
         # Get the previous frame by reading the field with previous frame index
@@ -177,9 +177,9 @@ class Frame(Array):
 
     def print_stack_trace(self, nilObject):
         # Print a stack trace starting in this frame
-        from som.vm.universe import Universe
-        Universe.std_print(self.get_method().get_holder().get_name().get_string())
-        Universe.std_print(self.get_bytecode_index() + "@"
+        from som.vm.universe import std_print
+        std_print(self.get_method().get_holder().get_name().get_string())
+        std_print(self.get_bytecode_index() + "@"
                            + self.get_method().get_signature().get_string())
         
         if self.has_previous_frame(nilObject):
