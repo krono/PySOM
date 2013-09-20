@@ -5,8 +5,6 @@ from som.vmobjects.invokable import Invokable
 
 from som.interpreter.bytecodes import Bytecodes
 
-from array import array
-
 class Method(Array, Invokable):
     
     # Static field indices and number of method fields
@@ -96,11 +94,12 @@ class Method(Array, Invokable):
 
     def get_bytecode(self, index):
         # Get the bytecode at the given index
-        return self._bytecodes[index]
+        return ord(self._bytecodes[index])
 
     def set_bytecode(self, index, value):
         # Set the bytecode at the given index to the given value
-        self._bytecodes[index] = value
+        assert 0 <= value and value <= 255
+        self._bytecodes[index] = chr(value)
 
     # TODO: remove these things
     def increase_invocation_counter(self):
