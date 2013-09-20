@@ -1,6 +1,8 @@
 from som.interpreter.bytecodes import bytecode_length
 
 class InterpreterHalt(Exception):
+    """This exception is used to exit from the interpreter loop using the
+       HALT bytecode."""
     pass
 
 class Interpreter(object):
