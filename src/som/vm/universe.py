@@ -553,6 +553,7 @@ class Universe(object):
     def _load_system_class(self, system_class):
         # Load the system class
         result = self._load_class(system_class.get_name(), system_class)
+        assert result is not None
 
         # Load primitives if necessary
         if result.has_primitives():
