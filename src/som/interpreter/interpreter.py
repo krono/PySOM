@@ -161,7 +161,7 @@ class Interpreter(object):
         old_bytecode_index = 0
         old_frame = None
         while True:
-            frame = self.get_frame
+            frame = self.get_frame()
             # Get the current bytecode index
             bytecode_index = self.get_frame().get_bytecode_index()
             
