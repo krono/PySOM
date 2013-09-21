@@ -1,13 +1,6 @@
 from som.interpreter.bytecodes import bytecode_length, Bytecodes
 
-from rpython.rlib.jit import JitDriver
-
-jitdriver = JitDriver(greens=['bytecode_index', 'bytecode', 'bc_length', 'next_bytecode_index', 'self'], reds=['frame'])
-        #reds=['tape'])
-
-def jitpolicy(driver):
-    from rpython.jit.codewriter.policy import JitPolicy
-    return JitPolicy()
+from rpython.rlib import jit
 
 class Interpreter(object):
     
@@ -165,10 +158,23 @@ class Interpreter(object):
 
     def start(self):
         # Iterate through the bytecodes
+        old_bytecode_index = 0
+        old_frame = None
         while True:
+            frame = self.get_frame
             # Get the current bytecode index
             bytecode_index = self.get_frame().get_bytecode_index()
             
+            if frame == old_frame and bytecode_index < old_bytecode_index:
+                jitdriver.can_enter_jit(bytecode_index=bytecode_index,
+                          # bytecode=bytecode,
+                          # bc_length=bc_length,
+                          # next_bytecode_index = next_bytecode_index,
+                          frame=frame,
+                          interp=self)
+            old_bytecode_index = bytecode_index
+            old_frame =  frame
+
             # Get the current bytecode
             bytecode = self.get_method().get_bytecode(bytecode_index)
 
@@ -178,12 +184,12 @@ class Interpreter(object):
             # Compute the next bytecode index
             next_bytecode_index = bytecode_index + bc_length
 
-            jitdriver.jit_merge_point(bytecode_index = bytecode_index,
-                          bytecode = bytecode, 
-                          bc_length = bc_length,
-                          next_bytecode_index = next_bytecode_index,
-                          frame = self._frame,
-                          self = self)
+            jitdriver.jit_merge_point(bytecode_index=bytecode_index,
+                          # bytecode=bytecode,
+                          # bc_length=bc_length,
+                          # next_bytecode_index = next_bytecode_index,
+                          frame=frame,
+                          interp=self)
                         
             # Update the bytecode index of the frame
             self.get_frame().set_bytecode_index(next_bytecode_index)
@@ -221,6 +227,7 @@ class Interpreter(object):
                 self._do_return_local()
             elif bytecode == Bytecodes.return_non_local:
                 self._do_return_non_local()
+
 
     def push_new_frame(self, method):
         # Allocate a new frame and make it the current one
@@ -296,3 +303,17 @@ class Interpreter(object):
 
         # Push the result
         self.get_frame().push(result)
+
+def get_printable_location(bytecode_index, interp):
+    return "%d" % (bytecode_index)
+
+jitdriver = jit.JitDriver(
+    greens=['bytecode_index', 'interp'],
+    reds=['frame'],
+    virtualizables=['frame'],
+    get_printable_location=get_printable_location)
+        #reds=['tape'])
+
+def jitpolicy(driver):
+    from rpython.jit.codewriter.policy import JitPolicy
+    return JitPolicy()
