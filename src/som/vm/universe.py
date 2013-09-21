@@ -602,6 +602,8 @@ def _read_raw(answer):
     buf = os.read(1, 32)
     if len(buf) == 0:
         return (answer, False)
+    elif buf == "\n" and len(answer) ==0 :
+        return (buf, False)
     elif buf[-1] == "\n":
         return (answer + buf[:-1], False)
     else:
