@@ -1,5 +1,14 @@
 from som.interpreter.bytecodes import bytecode_length, Bytecodes
 
+from rpython.rlib.jit import JitDriver
+
+jitdriver = JitDriver(greens=['bytecode_index', 'bytecode', 'bc_length', 'next_bytecode_index', 'self'], reds=['frame'])
+        #reds=['tape'])
+
+def jitpolicy(driver):
+    from rpython.jit.codewriter.policy import JitPolicy
+    return JitPolicy()
+
 class Interpreter(object):
     
     def __init__(self, universe):
@@ -169,6 +178,13 @@ class Interpreter(object):
             # Compute the next bytecode index
             next_bytecode_index = bytecode_index + bc_length
 
+            jitdriver.jit_merge_point(bytecode_index = bytecode_index,
+                          bytecode = bytecode, 
+                          bc_length = bc_length,
+                          next_bytecode_index = next_bytecode_index,
+                          frame = self._frame,
+                          self = self)
+                        
             # Update the bytecode index of the frame
             self.get_frame().set_bytecode_index(next_bytecode_index)
 
