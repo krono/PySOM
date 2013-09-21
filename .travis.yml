@@ -14,5 +14,5 @@ script:
   - PYTHONPATH=$PYTHONPATH:pypy ./som.sh -cp Smalltalk TestSuite/TestHarness.som
   - PYTHONPATH=$PYTHONPATH:pypy pypy/rpython/bin/rpython --batch src/targetsomstandalone.py
   - ./som -cp Smalltalk TestSuite/TestHarness.som
-  #- PYTHONPATH=$PYTHONPATH:pypy pypy/rpython/bin/rpython --batch -Ojit src/targetsomstandalone.py
-  #- ./som -cp Smalltalk TestSuite/TestHarness.som
+  - PYTHONPATH=$PYTHONPATH:pypy pypy/rpython/bin/rpython --batch -Ojit src/targetsomstandalone.py
+  - ./som -cp Smalltalk TestSuite/TestHarness.som
