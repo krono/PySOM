@@ -1,4 +1,5 @@
 from som.interpreter.bytecodes import bytecode_length, Bytecodes
+from som.vmobjects.frame import Frame
 
 from rpython.rlib import jit
 
@@ -162,6 +163,7 @@ class Interpreter(object):
         old_frame = None
         while True:
             frame = self.get_frame()
+            assert isinstance(frame, Frame)
             # Get the current bytecode index
             bytecode_index = self.get_frame().get_bytecode_index()
             
@@ -175,6 +177,13 @@ class Interpreter(object):
             old_bytecode_index = bytecode_index
             old_frame =  frame
 
+            jitdriver.jit_merge_point(bytecode_index=bytecode_index,
+                          # bytecode=bytecode,
+                          # bc_length=bc_length,
+                          # next_bytecode_index = next_bytecode_index,
+                          frame=frame,
+                          interp=self)
+
             # Get the current bytecode
             bytecode = self.get_method().get_bytecode(bytecode_index)
 
@@ -184,13 +193,7 @@ class Interpreter(object):
             # Compute the next bytecode index
             next_bytecode_index = bytecode_index + bc_length
 
-            jitdriver.jit_merge_point(bytecode_index=bytecode_index,
-                          # bytecode=bytecode,
-                          # bc_length=bc_length,
-                          # next_bytecode_index = next_bytecode_index,
-                          frame=frame,
-                          interp=self)
-                        
+
             # Update the bytecode index of the frame
             self.get_frame().set_bytecode_index(next_bytecode_index)
 
@@ -310,7 +313,7 @@ def get_printable_location(bytecode_index, interp):
 jitdriver = jit.JitDriver(
     greens=['bytecode_index', 'interp'],
     reds=['frame'],
-    virtualizables=['frame'],
+    # virtualizables=['frame'],
     get_printable_location=get_printable_location)
         #reds=['tape'])
 
