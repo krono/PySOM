@@ -41,4 +41,4 @@ class TestLLtype(LLJitMixin):
                 return e.code
             return -1
 
-        self.meta_interp(interp_w, [], listcomp=True, listops=True, backendopt=False)
+        self.meta_interp(interp_w, [], listcomp=True, listops=True, backendopt=True)

@@ -166,9 +166,11 @@ class Interpreter(object):
             assert isinstance(frame, Frame)
             # Get the current bytecode index
             bytecode_index = self.get_frame().get_bytecode_index()
-            
+            method = self.get_method()
+
             if frame == old_frame and bytecode_index < old_bytecode_index:
                 jitdriver.can_enter_jit(bytecode_index=bytecode_index,
+                          method=method,
                           # bytecode=bytecode,
                           # bc_length=bc_length,
                           # next_bytecode_index = next_bytecode_index,
@@ -178,6 +180,7 @@ class Interpreter(object):
             old_frame =  frame
 
             jitdriver.jit_merge_point(bytecode_index=bytecode_index,
+                          method=method,
                           # bytecode=bytecode,
                           # bc_length=bc_length,
                           # next_bytecode_index = next_bytecode_index,
@@ -307,11 +310,11 @@ class Interpreter(object):
         # Push the result
         self.get_frame().push(result)
 
-def get_printable_location(bytecode_index, interp):
-    return "%d" % (bytecode_index)
+def get_printable_location(bytecode_index, interp, method):
+    return "%d, %s, %s" % (bytecode_index, interp, method)
 
 jitdriver = jit.JitDriver(
-    greens=['bytecode_index', 'interp'],
+    greens=['bytecode_index', 'interp', 'method'],
     reds=['frame'],
     # virtualizables=['frame'],
     get_printable_location=get_printable_location)
