@@ -160,7 +160,6 @@ class Interpreter(object):
     def start(self):
         # Iterate through the bytecodes
         old_bytecode_index = 0
-        old_frame = None
         while True:
             frame = self.get_frame()
             assert isinstance(frame, Frame)
@@ -168,7 +167,7 @@ class Interpreter(object):
             bytecode_index = self.get_frame().get_bytecode_index()
             method = self.get_method()
 
-            if frame == old_frame and bytecode_index < old_bytecode_index:
+            if bytecode_index < old_bytecode_index:
                 jitdriver.can_enter_jit(bytecode_index=bytecode_index,
                           method=method,
                           # bytecode=bytecode,
@@ -177,7 +176,6 @@ class Interpreter(object):
                           frame=frame,
                           interp=self)
             old_bytecode_index = bytecode_index
-            old_frame =  frame
 
             jitdriver.jit_merge_point(bytecode_index=bytecode_index,
                           method=method,
