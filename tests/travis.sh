@@ -3,7 +3,7 @@
 set -e
 set -x
 
-pypy/pytest
+pypy/pytest.py
 nosetests
 
 if [ "$RUN" = "hosted" ]; then
