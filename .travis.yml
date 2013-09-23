@@ -4,15 +4,17 @@ python:
   - "2.7"
   - "pypy"
 
+env:
+  global:
+    - PYTHONPATH=$PYTHONPATH:pypy:src
+  matrix:
+    - RUN=hosted
+    - RUN=translated OPTIMIZE=2
+    - RUN=translated OPTIMIZE=jit
+
 install:
   - wget https://bitbucket.org/pypy/pypy/get/default.tar.bz2 || wget https://bitbucket.org/pypy/pypy/get/default.tar.bz2
   - tar -xjf default.tar.bz2
   - mv pypy-pypy-* pypy
-# command to run tests
-script:
-  - PYTHONPATH=$PYTHONPATH:pypy nosetests
-  - PYTHONPATH=$PYTHONPATH:pypy ./som.sh -cp Smalltalk TestSuite/TestHarness.som
-  - PYTHONPATH=$PYTHONPATH:pypy pypy/rpython/bin/rpython --batch src/targetsomstandalone.py
-  - ./som -cp Smalltalk TestSuite/TestHarness.som
-  - PYTHONPATH=$PYTHONPATH:pypy pypy/rpython/bin/rpython --batch -Ojit src/targetsomstandalone.py
-  - ./som -cp Smalltalk TestSuite/TestHarness.som
+
+script: tests/travis.sh
