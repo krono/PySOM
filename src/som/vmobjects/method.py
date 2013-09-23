@@ -11,7 +11,8 @@ class Method(Array):
     HOLDER_INDEX                    = 1 + SIGNATURE_INDEX
     NUMBER_OF_METHOD_FIELDS         = 1 + HOLDER_INDEX
 
-    
+    _immutable_fileds_ = ["_bytecodes[*]", "_inline_cache_class"]
+
     def __init__(self, nilObject):
         Array.__init__(self, nilObject)
         

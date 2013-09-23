@@ -296,6 +296,7 @@ class Interpreter(object):
         # Return the popped frame
         return result
 
+    @jit.unroll_safe
     def _pop_frame_and_push_result(self, result):
         # Pop the top frame from the interpreter frame stack and compute the
         # number of arguments

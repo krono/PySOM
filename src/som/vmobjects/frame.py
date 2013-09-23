@@ -1,3 +1,4 @@
+from rpython.rlib import jit
 from som.vmobjects.array import Array
 
 # Frame layout:
@@ -19,12 +20,15 @@ class Frame(Array):
     METHOD_INDEX           = 1 + CONTEXT_INDEX
     NUMBER_OF_FRAME_FIELDS = 1 + METHOD_INDEX
 
+    _immutable_fileds_ = ["_method"]
+
     def __init__(self, nilObject):
         Array.__init__(self, nilObject)
         self._stack_pointer  = 0
         self._bytecode_index = 0
         self._local_offset   = 0
-    
+
+        self._method = None
     def get_previous_frame(self):
         # Get the previous frame by reading the field with previous frame index
         return self.get_field(self.PREVIOUS_FRAME_INDEX)
@@ -54,17 +58,15 @@ class Frame(Array):
     def has_context(self, nilObject):
         return self.get_field(self.CONTEXT_INDEX) != nilObject
 
+    @jit.unroll_safe
     def _get_context(self, level):
         # Get the context frame at the given level
         frame = self
 
         # Iterate through the context chain until the given level is reached
-        while level > 0:
+        for _ in range(level, 0, -1):
             # Get the context of the current frame
             frame = frame.get_context()
-
-            # Go to the next level
-            level = level - 1
 
         # Return the found context
         return frame
@@ -82,11 +84,16 @@ class Frame(Array):
 
     def get_method(self):
         # Get the method by reading the field with method index
-        return self.get_field(self.METHOD_INDEX)
+        #return jit.promote(self.get_field(self.METHOD_INDEX))
+        # use the direct value, it is immutable
+        return self._method
 
     def set_method(self, value):
         # Set the method by writing to the field with method index
         self.set_field(self.METHOD_INDEX, value)
+        # mirror it in the local object
+        self._method = value
+
 
     def _get_default_number_of_fields(self):
         # Return the default number of fields in a frame
@@ -106,7 +113,8 @@ class Frame(Array):
 
     def get_stack_pointer(self):
         # Get the current stack pointer for this frame
-        return self._stack_pointer
+        return jit.promote(self._stack_pointer)
+
 
     def set_stack_pointer(self, value):
         # Set the current stack pointer for this frame
@@ -167,6 +175,7 @@ class Frame(Array):
         # Set the argument with the given index to the given value
         context.set_indexable_field(index, value)
 
+    @jit.unroll_safe
     def copy_arguments_from(self, frame):
         # copy arguments from frame:
         # - arguments are at the top of the stack of frame.

@@ -1,4 +1,5 @@
 from rpython.rlib.rrandom import Random
+from rpython.rlib import jit
 
 from som.interpreter.interpreter import Interpreter
 from som.interpreter.bytecodes   import Bytecodes 
@@ -505,6 +506,7 @@ class Universe(object):
         # Returns if the universe has a value for the global of the given name
         return name in self._globals
     
+    @jit.elidable
     def _get_block_class(self, number_of_arguments = None):
         if not number_of_arguments:
             # Get the generic block class
