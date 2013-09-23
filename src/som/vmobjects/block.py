@@ -33,21 +33,9 @@ class Block(Object):
         return self.NUMBER_OF_BLOCK_FIELDS
   
     class Evaluation(Primitive):
-        def __init__(self, num_args, universe):            
-            def _invoke(ivkbl, frame, interpreter):
-                # Get the block (the receiver) from the stack
-                rcvr = frame.get_stack_element(ivkbl._number_of_arguments - 1)
-    
-                # Get the context of the block...
-                context = rcvr.get_context()
-    
-                # Push a new frame and set its context to be the one specified in
-                # the block
-                new_frame = interpreter.push_new_frame(rcvr.get_method())
-                new_frame.copy_arguments_from(frame)
-                new_frame.set_context(context)
-            
-            Primitive.__init__(self, self._compute_signature_string(num_args), universe, _invoke)
+        def __init__(self, num_args, universe, invoke):
+            signature = self._compute_signature_string(num_args)
+            Primitive.__init__(self, signature, universe, invoke)
             self._number_of_arguments = num_args
 
         def _compute_signature_string(self, num_args):
@@ -55,13 +43,26 @@ class Block(Object):
             signature_string = "value"
             if num_args > 1:
                 signature_string += ":"
-
-            # Add extra value: selector elements if necessary
-            for _ in range(2, num_args):
-                signature_string += "with:"
+                if num_args > 2:
+                    # Add extra with: selector elements if necessary
+                    signature_string += "with:" * (num_args - 2)
           
             # Return the signature string
             return signature_string
 
 def block_evaluation_primitive(num_args, universe):
-    return Block.Evaluation(num_args, universe)
+    return Block.Evaluation(num_args, universe, _invoke)
+
+def _invoke(ivkbl, frame, interpreter):
+    # Get the block (the receiver) from the stack
+    assert isinstance(ivkbl, Block.Evaluation)
+    rcvr = frame.get_stack_element(ivkbl._number_of_arguments - 1)
+
+    # Get the context of the block...
+    context = rcvr.get_context()
+
+    # Push a new frame and set its context to be the one specified in
+    # the block
+    new_frame = interpreter.push_new_frame(rcvr.get_method())
+    new_frame.copy_arguments_from(frame)
+    new_frame.set_context(context)

@@ -309,7 +309,13 @@ class Interpreter(object):
         self.get_frame().push(result)
 
 def get_printable_location(bytecode_index, interp, method):
-    return "%d, %s, %s" % (bytecode_index, interp, method)
+    from som.vmobjects.method import Method
+    from som.interpreter.bytecodes import bytecode_as_str
+    assert isinstance(method, Method)
+    bc = method.get_bytecode(bytecode_index)
+    return "%s @ %d in %s" % (bytecode_as_str(bc),
+                              bytecode_index,
+                              method.merge_point_string())
 
 jitdriver = jit.JitDriver(
     greens=['bytecode_index', 'interp', 'method'],

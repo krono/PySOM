@@ -38,7 +38,7 @@ class Method(Array):
         return True
   
     def get_number_of_locals(self):
-        # Get the number of locals (converted to a Java integer)
+        # Get the number of locals
         return self._number_of_locals
 
     def set_number_of_locals(self, value):
@@ -190,3 +190,10 @@ class Method(Array):
     def set_inline_cache(self, bytecode_index, receiver_class, invokable):
         self._inline_cache_class[bytecode_index]    = receiver_class
         self._inline_cache_invokable[bytecode_index] = invokable
+
+    #
+    # debug infor for the jit
+    #
+    def merge_point_string(self):
+        return "%s>>%s" % (self.get_holder().get_name().get_string(),
+                           self.get_signature().get_string())
