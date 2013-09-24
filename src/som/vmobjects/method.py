@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+from rpython.rlib import jit
+
 from som.vmobjects.array import Array
 
 from som.interpreter.bytecodes import bytecode_length
@@ -99,8 +101,10 @@ class Method(Array):
         self._inline_cache_class     = [None] * value
         self._inline_cache_invokable = [None] * value
 
+    @jit.elidable
     def get_bytecode(self, index):
         # Get the bytecode at the given index
+        assert 0 <= index and index < len(self._bytecodes)
         return ord(self._bytecodes[index])
 
     def set_bytecode(self, index, value):
@@ -182,10 +186,14 @@ class Method(Array):
     def __str__(self):
         return "Method(" + self.get_holder().get_name().get_string() + ">>" + str(self.get_signature()) + ")"
 
+    @jit.elidable
     def get_inline_cache_class(self, bytecode_index):
+        assert 0 <= bytecode_index and bytecode_index < len(self._inline_cache_class)
         return self._inline_cache_class[bytecode_index]
 
+    @jit.elidable
     def get_inline_cache_invokable(self, bytecode_index):
+        assert 0 <= bytecode_index and bytecode_index < len(self._inline_cache_invokable)
         return self._inline_cache_invokable[bytecode_index]
 
     def set_inline_cache(self, bytecode_index, receiver_class, invokable):

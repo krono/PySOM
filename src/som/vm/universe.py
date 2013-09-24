@@ -271,15 +271,15 @@ class Universe(object):
         self.set_global(self.symbol_for("System"), self.systemClass)
         self.set_global(self.symbol_for("Block"),  self.blockClass)
         return system_object
-    
+
+    @jit.elidable
     def symbol_for(self, string):
+#        assert isinstance(string, str)
         # Lookup the symbol in the symbol table
         result = self._symbol_table.lookup(string)
-        if result:
-            return result
-        
-        # Create a new symbol and return it
-        result = self.new_symbol(string)
+        if result is None:
+            # Create a new symbol and return it
+            result = self.new_symbol(string)
         return result
     
     def new_array_with_length(self, length):

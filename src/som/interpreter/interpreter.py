@@ -158,6 +158,7 @@ class Interpreter(object):
 
 
     def start(self):
+        jit.promote(self)
         # Iterate through the bytecodes
         old_bytecode_index = 0
         while True:
@@ -165,7 +166,7 @@ class Interpreter(object):
             assert isinstance(frame, Frame)
             # Get the current bytecode index
             bytecode_index = self.get_frame().get_bytecode_index()
-            method = self.get_method()
+            method = jit.promote(self.get_method())
 
             if bytecode_index < old_bytecode_index:
                 jitdriver.can_enter_jit(bytecode_index=bytecode_index,

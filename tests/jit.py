@@ -37,8 +37,7 @@ class TestLLtype(LLJitMixin):
         return (u, frame, invokable)
 
     def test_inc(self):
-        universe, frame, invokable = self._compile(
-            """
+        universe, frame, invokable = self._compile("""
             C_0 = (
                 run = ( | tmp |
                         tmp := 1.
@@ -59,8 +58,7 @@ class TestLLtype(LLJitMixin):
                          listcomp=True, listops=True, backendopt=True)
 
     def test_rec(self):
-        universe, frame, invokable = self._compile(
-            """
+        universe, frame, invokable = self._compile("""
             C_1 = (
                 count: n = ( ^ (n > 0)
                                  ifTrue: [self count: n - 1]
@@ -78,3 +76,98 @@ class TestLLtype(LLJitMixin):
 
         self.meta_interp(interp_w, [],
                          listcomp=True, listops=True, backendopt=True)
+
+    def test_sieve(self):
+        universe, frame, invokable = self._compile("""
+           "Adapted from Sieve.som"
+            Sieve = (
+                benchmark = (
+                    | flags result |
+                    flags  := Array new: 5000.
+                    result := self sieve: flags size: 5000.
+                    ^ (result = 669)
+                )
+
+                sieve: flags size: size = (
+                    | primeCount |
+                    primeCount := 0.
+                    flags putAll: true.
+                    2 to: size do: [ :i |
+                        (flags at: i - 1) ifTrue: [
+                            | k |
+                            primeCount := primeCount + 1.
+                            k := i + i.
+                            [ k <= size ] whileTrue: [
+                                flags at: k - 1 put: false. k := k + i ]]].
+                    ^primeCount
+                )
+            )""", "benchmark")
+        def interp_w():
+            try:
+                universe.start(frame, invokable)
+            except Exit as e:
+                return e.code
+            return -1
+
+        self.meta_interp(interp_w, [],
+                         listcomp=True, listops=True, backendopt=True)
+
+    def test_field(self):
+        universe, frame, invokable = self._compile("""
+           "Adapted from FieldLoop.som"
+            FieldLoop = (
+                | counter |
+
+                benchmark = ( | iter |
+                    counter := 0.
+                    iter := 20000.
+
+                    [ iter > 0 ] whileTrue: [
+                      iter := iter - 1.
+                      counter := counter + 1.
+                      counter := counter + 1.
+                      counter := counter + 1.
+                      counter := counter + 1.
+                      counter := counter + 1.
+
+                      counter := counter + 1.
+                      counter := counter + 1.
+                      counter := counter + 1.
+                      counter := counter + 1.
+                      counter := counter + 1.
+
+                      counter := counter + 1.
+                      counter := counter + 1.
+                      counter := counter + 1.
+                      counter := counter + 1.
+                      counter := counter + 1.
+
+                      counter := counter + 1.
+                      counter := counter + 1.
+                      counter := counter + 1.
+                      counter := counter + 1.
+                      counter := counter + 1.
+
+                      counter := counter + 1.
+                      counter := counter + 1.
+                      counter := counter + 1.
+                      counter := counter + 1.
+                      counter := counter + 1.
+
+                      counter := counter + 1.
+                      counter := counter + 1.
+                      counter := counter + 1.
+                      counter := counter + 1.
+                      counter := counter + 1.]
+                )
+            )""", "benchmark")
+        def interp_w():
+            try:
+                universe.start(frame, invokable)
+            except Exit as e:
+                return e.code
+            return -1
+
+        self.meta_interp(interp_w, [],
+                         listcomp=True, listops=True, backendopt=True)
+

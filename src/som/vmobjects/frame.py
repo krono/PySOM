@@ -86,7 +86,7 @@ class Frame(Array):
         # Get the method by reading the field with method index
         #return jit.promote(self.get_field(self.METHOD_INDEX))
         # use the direct value, it is immutable
-        return self._method
+        return jit.promote(self._method)
 
     def set_method(self, value):
         # Set the method by writing to the field with method index
